@@ -1,0 +1,384 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html 
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Untitled</title>
+</head>
+<body>
+<h1><a name="label:0" id="label:0">Ruby-LCD Documentation</a></h1><!-- RDLabel: "Ruby-LCD Documentation" -->
+<h3><a name="label:1" id="label:1">(C) 2003 Ryan Joseph, http://seph.us/</a></h3><!-- RDLabel: "(C) 2003 Ryan Joseph, http://seph.us/" -->
+<p>This document has all of the API documentation for the Ruby-LCD library, found
+in <code>lib/lcd.rc</code> in the distrobution of Ruby-LCD, available from 
+<a href="http://seph.us/?z=code-ruby-lcd">&lt;URL:http://seph.us/?z=code-ruby-lcd&gt;</a></p>
+<p>For CVS reference, the last revision of this file: <code>$Id: lcd.html,v 1.3 2003/08/18 02:46:20 rjoseph Exp $</code></p>
+<p>Errors, corrections, comments: <a href="mailto:j@seph.us">&lt;URL:mailto:j@seph.us&gt;</a></p>
+<h1><a name="label:2" id="label:2">Class Documentation</a></h1><!-- RDLabel: "Class Documentation" -->
+<h2><a name="label:3" id="label:3">Index</a></h2><!-- RDLabel: "Index" -->
+<ul>
+<li><a href="#label:5">LCD</a></li>
+<li><a href="#label:23">LCD::Screen</a></li>
+<li><a href="#label:36">LCD::Widget</a></li>
+<li><a href="#label:44">LCD::Bar</a></li>
+<li><a href="#label:53">LCD::Scroller</a></li>
+<li><a href="#label:60">LCD::Text</a></li>
+<li><a href="#label:67">LCD::Title</a></li>
+<li><a href="#label:73">LCD::Status</a></li>
+</ul>
+<h2><a name="label:4" id="label:4">Code Examples</a></h2><!-- RDLabel: "Code Examples" -->
+<p>For many great, wonderful, amazing examples, see the <code>clients/</code> directory
+in the distro files, or just check the CVS repository.  I would put a quick
+bit of inline code here, but lets just say that RubyDoc <em>sucks</em>, so that
+won't be happening.  Sorry.</p>
+<h1><a name="label:5" id="label:5">LCD</a></h1><!-- RDLabel: "LCD" -->
+<p>The main class for communicating with LCDProc, it requires that objects
+descended from type <code>LCD::Widget</code> are added to it in order to create
+display objects on the device.</p>
+<p>Throughout this documentation, when describing method signatures, required
+arugments will be given without any decoration - such as <code>Foo.bar(baz)</code> -
+whereas optional arguments will be given in the Ruby style, enclosed in square
+brackets with the default value given as an assignment - such as
+<code>Foo.boo([baz="hi!"])</code>.</p>
+<h2><a name="label:6" id="label:6">Class Methods</a></h2><!-- RDLabel: "Class Methods" -->
+<dl>
+<dt><a name="label:7" id="label:7"><code>LCD.new([<var>name</var> = '<var>rblcdproc</var>'], [<var>server</var> = '<var>localhost</var>'], [<var>port</var> = <var>13666</var>])</code></a><!-- RDLabel: "LCD.new" -->
+</dl>
+<p>Creates a new instance of <code>LCD</code>, using the supplied arguments if given to
+connect to an instance of LCDProc.  However <em>note</em> that no actual socket
+connection is made until <a href="#label:13">LCD#connect</a> is called!</p>
+<h2><a name="label:8" id="label:8">Instance Attributes</a></h2><!-- RDLabel: "Instance Attributes" -->
+<h3><a name="label:9" id="label:9">Read-only</a></h3><!-- RDLabel: "Read-only" -->
+<ul>
+<li><code>screen_list</code> - As hash (keyed by screen ID) of all the <a href="#label:23">LCD::Screen</a>s
+   currently registered with this <code>LCD</code> object.</li>
+</ul>
+<h3><a name="label:10" id="label:10">Read/write</a></h3><!-- RDLabel: "Read/write" -->
+<ul>
+<li><code>proc_resp (defaults to false)</code> - If set to <code>true</code>, causes <code>LCD</code> to
+   automatically grab each server response after sending a request.  This is
+   usually what you probably want, so I would suggest turning this on.  An 
+   <a href="#label:73">LCD::Status</a> object will be returned by methods that glean a server 
+   response, provided this is set.  Otherwise, you'll need to use 
+   <a href="#label:17">LCD#get_status</a> to continually get server responses.  <em>Note:</em> See
+   <a href="#label:73">LCD::Status</a> for more information on server responses, because
+   <a href="#label:17">LCD#get_status</a> can be dangerous!</li>
+<li><code>debug_on (defaults to false)</code> - Inherited from the <code>Debug</code> class,
+   turns on debugging output.</li>
+</ul>
+<h2><a name="label:11" id="label:11">Instance Methods</a></h2><!-- RDLabel: "Instance Methods" -->
+<p>Let me just lodge my official complaint against the Ruby standard practice of
+using '#' to notate instance methods: although I use it here for
+standardization purposes, I think it may be one of the ugliest and most
+annoying features of the language.  Ok, I'm done now ;)</p>
+<dl>
+<dt><a name="label:12" id="label:12"><code>LCD#add_screen(<var>LCD</var>::<var>Screen</var>)</code></a><!-- RDLabel: "LCD#add_screen" -->
+</dl>
+<p>Adds a <code>LCD:Screen</code> to this <code>LCD</code>.  If the screen has any
+widgets registered, these will be added to the server and displayed.
+Otherwise, it will be necessary to add the widgets with
+<a href="#label:30">LCD::Screen#add_widget</a> or <a href="#label:31">LCD::Screen#add_widgets</a> and then call
+<a href="#label:20">LCD#update_screen</a>.</p>
+<dl>
+<dt><a name="label:13" id="label:13"><code>LCD#connect()</code></a><!-- RDLabel: "LCD#connect" -->
+</dl>
+<p>Create a connection to the LCDProc server supplied as arguments to
+<code>.new()</code> earlier.  </p>
+<dl>
+<dt><a name="label:14" id="label:14"><code>LCD#close()</code></a><!-- RDLabel: "LCD#close" -->
+</dl>
+<p>Closes the connection to the server, calling <a href="#label:15">LCD#del_screen</a> as necessary
+to ensure that each screen is correctly deleted from the server.</p>
+<dl>
+<dt><a name="label:15" id="label:15"><code>LCD#del_screen(<var>LCD</var>::<var>String</var>)</code></a><!-- RDLabel: "LCD#del_screen" -->
+<dt><a name="label:16" id="label:16"><code>LCD#del_screen(<var>String</var>)</code></a><!-- RDLabel: "LCD#del_screen" -->
+</dl>
+<p>Deletes a screen from the display and from the internal <code>screen_list</code>.</p>
+<dl>
+<dt><a name="label:17" id="label:17"><code>LCD#get_status()</code></a><!-- RDLabel: "LCD#get_status" -->
+</dl>
+<p>Gets the last server response and returns an <a href="#label:73">LCD::Status</a> object
+describing that response.</p>
+<dl>
+<dt><a name="label:18" id="label:18"><code>LCD#send_raw(<var>String</var>)</code></a><!-- RDLabel: "LCD#send_raw" -->
+</dl>
+<p>Send a raw command to the LCDProc server.  Not recommended for use.</p>
+<dl>
+<dt><a name="label:19" id="label:19"><code>LCD#trap_sigint()</code></a><!-- RDLabel: "LCD#trap_sigint" -->
+</dl>
+<p>Setups a SIGINT trap: <code>trap("INT", proc { close(); exit(); });</code>
+This is the recommended way to get out of the infinte "main loop" in a client
+program, as it cleans up correctly.</p>
+<dl>
+<dt><a name="label:20" id="label:20"><code>LCD#update_screen(<var>LCD</var>::<var>Screen</var>)</code></a><!-- RDLabel: "LCD#update_screen" -->
+<dt><a name="label:21" id="label:21"><code>LCD#update_screen(<var>String</var>)</code></a><!-- RDLabel: "LCD#update_screen" -->
+</dl>
+<p>If called with a <code>String</code> argument, will look up the screen using that
+name from the <code>screen_list</code>.  Updates the given screen on the display,
+updating any widgets that have changed first and then updating the screen
+itself, if it has changed.  Safe to call from the main program loop every
+time, it will only send data if elements have actually changed.</p>
+<dl>
+<dt><a name="label:22" id="label:22"><code>LCD#[<var>String</var>]</code></a><!-- RDLabel: "LCD#[]" -->
+</dl>
+<p>Overloaded bracket operators to allow easy access to <code>screen_list</code>.
+Returns an <a href="#label:23">LCD::Screen</a> object corresponding to key given, or <code>nil</code>
+if the object is not in the <code>screen_list</code>.</p>
+<h1><a name="label:23" id="label:23">LCD::Screen</a></h1><!-- RDLabel: "LCD::Screen" -->
+<p>An object that allows you to define a "screen" in the LCDProc space.  A
+"screen" is just a container that will have <em>n</em> "widgets" (any object
+descended from <a href="#label:36">LCD::Widget</a>) that are the actual display objects on the
+screen.</p>
+<h2><a name="label:24" id="label:24">Class Methods</a></h2><!-- RDLabel: "Class Methods" -->
+<dl>
+<dt><a name="label:25" id="label:25"><code>LCD::Screen.new(<var>sid</var>, [<var>name</var> = "<var>rblcdscreen</var>"], [<var>hbeat</var> = "<var>normal</var>"], [<var>dur</var> = -<var>1</var>], [<var>pri</var> = <var>128</var>], [<var>w</var> = -<var>1</var>], [<var>h</var> = -<var>1</var>])</code></a><!-- RDLabel: "LCD::Screen.new" -->
+</dl>
+<p>Creates a new <code>LCD::Screen</code>.  The only required argument is <code>sid</code>, the
+screen ID.  This can be anything as long as no other screen or widget shares
+it: my common practice is to use the name of the program and a unique screen
+ID, such as "IMAP.s0" for the IMAP client.</p>
+<p>The duration, width, and height (<code>dur</code>, <code>w</code>, and <code>h</code>) - if set to
+-1 as they are by default - will inherit the standard settings for the
+display currently in use.  This is the recommended behavior.</p>
+<p>Duration is given as the number of "frames," of which there are 8 in a second.</p>
+<p>Priority (<code>pri</code>) is a power of 2: see <code>man LCDd</code> on your system for
+more information, but in general, a lower power of 2 indicates a higher
+priority.  If you want your screen to be given focus ASAP, the suggested
+method is to set the priority to 64 for a set period of time, and then lower
+it back to 128 after you are satisfied.</p>
+<h2><a name="label:26" id="label:26">Instance Attributes</a></h2><!-- RDLabel: "Instance Attributes" -->
+<h3><a name="label:27" id="label:27">Read-only</a></h3><!-- RDLabel: "Read-only" -->
+<ul>
+<li><code>widget_list</code> - A hash (key by widget ID) of <a href="#label:36">LCD::Widget</a>s in this screen.</li>
+</ul>
+<h3><a name="label:28" id="label:28">Read/write</a></h3><!-- RDLabel: "Read/write" -->
+<ul>
+<li><code>duration (Integer)</code> - The number of frames (8/sec) for this screen to remain on
+   the display.</li>
+<li><code>name (String)</code> - The screen name</li>
+<li><code>has_changed (Boolean)</code> - Boolean indicating if this screen has changed or not.</li>
+<li><code>heartbeat (String)</code> - A proper hearbeat string
+   (<code>on|heart|normal|default|off|none|slash</code>).</li>
+<li><code>height (Integer)</code> - Screen height</li>
+<li><code>pri (Integer)</code> - The priority of this screen, as a power of 2, with
+   128 being the default ('normal') priority.  For a detailed explanation of
+   of screen priority works, see <code>man LCDd</code> on your system.</li>
+<li><code>sid (String)</code> - The screen ID</li>
+<li><code>width (Integer)</code> - Screen width</li>
+</ul>
+<h2><a name="label:29" id="label:29">Instance Methods</a></h2><!-- RDLabel: "Instance Methods" -->
+<dl>
+<dt><a name="label:30" id="label:30"><code>LCD::Screen#add_widget(<var>LCD</var>::<var>Widget</var>)</code></a><!-- RDLabel: "LCD::Screen#add_widget" -->
+</dl>
+<p>Add a single <a href="#label:36">LCD::Widget</a> to this screen</p>
+<dl>
+<dt><a name="label:31" id="label:31"><code>LCD::Screen#add_widgets(*<var>LCD</var>::<var>Widget</var>)</code></a><!-- RDLabel: "LCD::Screen#add_widgets" -->
+</dl>
+<p>Add a variable amount of <a href="#label:36">LCD::Widget</a>s to this screen</p>
+<dl>
+<dt><a name="label:32" id="label:32"><code>LCD::Screen#get_wid_ndx(<var>LCD</var>::<var>Widget</var>)</code></a><!-- RDLabel: "LCD::Screen#get_wid_ndx" -->
+</dl>
+<p>Get the index of the widget in <code>widget_list</code>, if it exists, <code>nil</code> if
+not.</p>
+<dl>
+<dt><a name="label:33" id="label:33"><code>LCD::Screen#pri_up()</code></a><!-- RDLabel: "LCD::Screen#pri_up" -->
+</dl>
+<p>Move this screen's priority up one level (subtract a power of two)</p>
+<dl>
+<dt><a name="label:34" id="label:34"><code>LCD::Screen#pri_down()</code></a><!-- RDLabel: "LCD::Screen#pri_down" -->
+</dl>
+<p>Move this screen's priority down one level (add a power of two)</p>
+<dl>
+<dt><a name="label:35" id="label:35"><code>LCD::Screen#to_s()</code></a><!-- RDLabel: "LCD::Screen#to_s" -->
+</dl>
+<p>Return a string representation of this <code>LCD::Screen</code>.  Not very useful,
+seriously.</p>
+<h1><a name="label:36" id="label:36">LCD::Widget</a></h1><!-- RDLabel: "LCD::Widget" -->
+<p><code>LCD::Widget</code> would be an abstract class in Ruby, if Ruby had abstract
+classes.  <code>LCD::Widget</code> is just that: abstract.  You'll never instantiate
+and <code>LCD::Widget</code>, although I suppose you could.  But you'll never want
+to, seriously, believe me on this one.  And if you did, well, you have more
+problems than just wanting to instantiate an <code>LCD::Widget</code>, and I suggest
+you seek personal help.</p>
+<p>However, never fear.  This class is actually quite useful, and its use
+highlights one of the great reasons why OOP is ... so great.  Of course, that
+reason being none of the methods that deal with widget-ish type objects ever
+really need to know what widget-ish type object they're actually dealing with.
+They're perfectly content to play around with <code>LCD::Widget</code>s all day and
+never know that they're actually playing with an <a href="#label:44">LCD::Bar</a>, or maybe an
+<a href="#label:53">LCD::Scroller</a> (or even some crazy widget type that doesn't even exist
+yet because I haven't written it)!</p>
+<p>And that, my friends, is the beauty of <code>LCD::Widget</code>.  Wow.</p>
+<h2><a name="label:37" id="label:37">Known Subclasses</a></h2><!-- RDLabel: "Known Subclasses" -->
+<ul>
+<li><a href="#label:44">LCD::Bar</a></li>
+<li><a href="#label:53">LCD::Scroller</a></li>
+<li><a href="#label:60">LCD::Text</a></li>
+<li><a href="#label:67">LCD::Title</a></li>
+</ul>
+<h2><a name="label:38" id="label:38">Class Methods</a></h2><!-- RDLabel: "Class Methods" -->
+<dl>
+<dt><a name="label:39" id="label:39"><code>LCD::Widget.new(<var>type</var>)</code></a><!-- RDLabel: "LCD::Widget.new" -->
+</dl>
+<p>Uhm, didn't I just tell you never to make one of these?  Then why are you
+still reading this!</p>
+<h2><a name="label:40" id="label:40">Instance Attributes</a></h2><!-- RDLabel: "Instance Attributes" -->
+<p>Any class derived from <code>LCD::Widget</code> will automatically have these</p>
+<h3><a name="label:41" id="label:41">Read-only</a></h3><!-- RDLabel: "Read-only" -->
+<ul>
+<li><code>type</code> - The type of <code>LCD::Widget</code></li>
+</ul>
+<h3><a name="label:42" id="label:42">Read/write</a></h3><!-- RDLabel: "Read/write" -->
+<ul>
+<li><code>has_changed</code> - Boolean indicating if this widget has changed: is used
+   to know when to update display elements on the LCD.</li>
+</ul>
+<h2><a name="label:43" id="label:43">Instance Methods</a></h2><!-- RDLabel: "Instance Methods" -->
+<p>None</p>
+<h1><a name="label:44" id="label:44">LCD::Bar</a></h1><!-- RDLabel: "LCD::Bar" -->
+<p>A bar graph-type UI element, can be either vertical or horizontal depending on
+how the object is constructed.</p>
+<h2><a name="label:45" id="label:45">Class Methods</a></h2><!-- RDLabel: "Class Methods" -->
+<dl>
+<dt><a name="label:46" id="label:46"><code>LCD::Bar.new(<var>len</var>, [<var>orien</var> = "<var>h</var>"], [<var>x</var> = <var>1</var>], [<var>y</var> = <var>1</var>])</code></a><!-- RDLabel: "LCD::Bar.new" -->
+</dl>
+<p>Constructs a new <code>LCD::Bar</code> widget object.  <code>len</code> is required and is
+the length of the bar, in pixels.  The defaults will create a horizontal bar
+at coordinates (1, 1) - the top left-hand corner.</p>
+<p>To create a vertical bar, simply set the second arugment (<code>orien</code>) to "v".</p>
+<h2><a name="label:47" id="label:47">Instance Attributes</a></h2><!-- RDLabel: "Instance Attributes" -->
+<h3><a name="label:48" id="label:48">Read/write</a></h3><!-- RDLabel: "Read/write" -->
+<ul>
+<li><code>len</code> - The length of the bar.  Change this and then call
+   <a href="#label:20">LCD#update_screen</a> on the screen that owns this widget to change the
+   length of this bar.</li>
+</ul>
+<h2><a name="label:49" id="label:49">Instance Methods</a></h2><!-- RDLabel: "Instance Methods" -->
+<dl>
+<dt><a name="label:50" id="label:50"><code>LCD::Bar#change_pos(<var>x</var>, <var>y</var>)</code></a><!-- RDLabel: "LCD::Bar#change_pos" -->
+</dl>
+<p>Move the bar to <code>(x, y)</code></p>
+<dl>
+<dt><a name="label:51" id="label:51"><code>LCD::Bar#decr_len()</code></a><!-- RDLabel: "LCD::Bar#decr_len" -->
+</dl>
+<p>Decrease bar length by one.</p>
+<dl>
+<dt><a name="label:52" id="label:52"><code>LCD::Bar#incr_len()</code></a><!-- RDLabel: "LCD::Bar#incr_len" -->
+</dl>
+<p>Increase bar length by one.</p>
+<h1><a name="label:53" id="label:53">LCD::Scroller</a></h1><!-- RDLabel: "LCD::Scroller" -->
+<p>A text UI object that can contain text data of any length, and will scroll to
+ensure that all of the data is displayed on the screen.</p>
+<h2><a name="label:54" id="label:54">Class Methods</a></h2><!-- RDLabel: "Class Methods" -->
+<dl>
+<dt><a name="label:55" id="label:55"><code>LCD::Scroller.new(<var>text</var>, <var>left</var>, <var>top</var>, <var>right</var>, <var>bottom</var>, [<var>direction</var> = "<var>h</var>"], [<var>speed</var> = <var>1</var>])</code></a><!-- RDLabel: "LCD::Scroller.new" -->
+</dl>
+<p>Create a new <code>LCD::Scroller</code> object, initialized with <code>text</code>, starting
+at coordinates <code>(left, top)</code> and extending to <code>(right, bottom)</code>.</p>
+<p>A horizontal scroller will scroll data to the left and right of the screen,
+and a vertical scroller will scroll up and down.</p>
+<p>If speed is positive, it indicates how many frames per each movement of the
+scroller.  If it is negative, it indicates how many movements the scroller
+should make in one frame (of which there are 8/sec by default).</p>
+<h2><a name="label:56" id="label:56">Instance Attributes</a></h2><!-- RDLabel: "Instance Attributes" -->
+<h3><a name="label:57" id="label:57">Read/write</a></h3><!-- RDLabel: "Read/write" -->
+<ul>
+<li><code>text</code> - The text of this <code>Scroller</code>, a <code>String</code></li>
+<li><code>speed</code> - The speed of this <code>Scroller</code></li>
+</ul>
+<h2><a name="label:58" id="label:58">Instance Methods</a></h2><!-- RDLabel: "Instance Methods" -->
+<dl>
+<dt><a name="label:59" id="label:59"><code>LCD::Scroller#change_pos(<var>left</var>, <var>top</var>, <var>right</var>, <var>bottom</var>)</code></a><!-- RDLabel: "LCD::Scroller#change_pos" -->
+</dl>
+<p>Change the position of the scroller as described in <a href="#label:55">LCD::Scroller.new</a></p>
+<h1><a name="label:60" id="label:60">LCD::Text</a></h1><!-- RDLabel: "LCD::Text" -->
+<p>A text UI element, about as generic as it gets.</p>
+<h2><a name="label:61" id="label:61">Class Methods</a></h2><!-- RDLabel: "Class Methods" -->
+<dl>
+<dt><a name="label:62" id="label:62"><code>LCD::Text.new(<var>text</var>, <var>x</var>, <var>y</var>)</code></a><!-- RDLabel: "LCD::Text.new" -->
+</dl>
+<p>Create a new <code>LCD::Text</code> object at <code>(x, y)</code> with text <code>text</code></p>
+<h2><a name="label:63" id="label:63">Instance Attributes</a></h2><!-- RDLabel: "Instance Attributes" -->
+<h3><a name="label:64" id="label:64">Read/write</a></h3><!-- RDLabel: "Read/write" -->
+<ul>
+<li><code>text</code> - The text of this <code>Scroller</code>, a <code>String</code></li>
+</ul>
+<h2><a name="label:65" id="label:65">Instance Methods</a></h2><!-- RDLabel: "Instance Methods" -->
+<dl>
+<dt><a name="label:66" id="label:66"><code>LCD::Text#change_pos(<var>x</var>, <var>y</var>)</code></a><!-- RDLabel: "LCD::Text#change_pos" -->
+</dl>
+<p>Move the text object to <code>(x, y)</code></p>
+<h1><a name="label:67" id="label:67">LCD::Title</a></h1><!-- RDLabel: "LCD::Title" -->
+<p>A UI element that describes the LCDProc title widget: it will be placed on the
+first line (the "heartbeat" line) and if it is larger than the space alloted
+by LCDProc, will be scrolled to fit.</p>
+<h2><a name="label:68" id="label:68">Class Methods</a></h2><!-- RDLabel: "Class Methods" -->
+<dl>
+<dt><a name="label:69" id="label:69"><code>LCD::Title.new(<var>text</var>)</code></a><!-- RDLabel: "LCD::Title.new" -->
+</dl>
+<p>Create a new title with text <code>text</code></p>
+<h2><a name="label:70" id="label:70">Instance Attributes</a></h2><!-- RDLabel: "Instance Attributes" -->
+<h3><a name="label:71" id="label:71">Read/write</a></h3><!-- RDLabel: "Read/write" -->
+<ul>
+<li><code>text</code> - The text of this <code>Scroller</code>, a <code>String</code></li>
+</ul>
+<h2><a name="label:72" id="label:72">Instance Methods</a></h2><!-- RDLabel: "Instance Methods" -->
+<p>None</p>
+<h1><a name="label:73" id="label:73">LCD::Status</a></h1><!-- RDLabel: "LCD::Status" -->
+<p>The <code>LCD::Status</code> object is returned by most methods in the <a href="#label:5">LCD</a>
+class, most namely <a href="#label:17">LCD#get_status</a>.  It is an encapsulation of the status
+of the <code>LCD</code> object in relation to the server: it's basically a single
+server response.</p>
+<p>You use these objects by examining their instance attributes (look a ways down
+the page).</p>
+<p>Most of the time, you can just toss these away without worrying about them:
+that's mainly what the <code>proc_resp</code> variable is for in the <code>LCD</code> class.
+By this I mean that most of the errors you'll get from LCDProc are errors
+involving not creating a widget/screen correctly, and it's easy enough to look
+at the display and see that you screwed something up.</p>
+<p>However, they may be times you actually want to know what the server said.
+There are two ways you can do this:</p>
+<ul>
+<li>Assuming you set <code>proc_resp</code> in for your <code>LCD</code> object, just grab
+   the return of any of the <code>LCD</code> instance methods that talk to the server
+   (FYI, they are: <a href="#label:13">LCD#connect</a>, <a href="#label:20">LCD#update_screen</a>,
+   <a href="#label:12">LCD#add_screen</a>, and <a href="#label:15">LCD#del_screen</a>).  This return value will be
+   an object of type <code>LCD::Status</code>, which you can then poke an prod to you
+   little heart's content.</li>
+<li>If you <em>haven't</em> set <code>proc_resp</code>, the <code>LCD</code> class won't grab
+   any response from the server, leaving them all to get queued up.  You can
+   use the <a href="#label:17">LCD#get_status</a> function as many times as you need, but <em>be
+   ware!</em>  <a href="#label:17">LCD#get_status</a> is <em>blocking</em>, so if you are waiting for
+   it to return, you may end up waiting forever, which - needless to say - can
+   get pretty annoying pretty quickly.</li>
+</ul>
+<p>Therefore, the recommended way to deal with status messages is to set
+<code>proc_resp</code> and then just take a look at them when you need to and toss
+the rest.</p>
+<h2><a name="label:74" id="label:74">Class Methods</a></h2><!-- RDLabel: "Class Methods" -->
+<dl>
+<dt><a name="label:75" id="label:75"><code>LCD::Status.new([<var>l</var> = <var>nil</var>], [<var>m</var> = <var>nil</var>], [<var>i</var> = <var>nil</var>], [<var>e</var> = <var>nil</var>])</code></a><!-- RDLabel: "LCD::Status.new" -->
+</dl>
+<p>Now lets be serious, when are you <em>ever</em> going to need to make one of
+these!  Seriously, don't, they're not for you!</p>
+<h2><a name="label:76" id="label:76">Instance Attributes</a></h2><!-- RDLabel: "Instance Attributes" -->
+<p>Here be the meat'n'potatoes of the <code>LCD::Status</code> object.  Each of these
+attributes servers two purposes: first, whichever one is non-<code>nil</code>
+indicates the actual state of the connection.  Secondly, the value of that
+non-<code>nil</code> element will be a string with important information relating to
+that state (for example, if the non-<code>nil</code> element is the <code>listen</code>
+attribute, then it will be set with the ID of the screen to be listening to).
+Without further ado:</p>
+<ul>
+<li><code>listen</code> - The server has notified us to listen to this screen.</li>
+<li><code>menu</code> - The server has sent us a menu event (<em>not yet
+   implemented</em>)</li>
+<li><code>ignore</code> - The server has told us to ignore this screen.</li>
+<li><code>error</code> - The server has responded with an error message (most likely a
+   "huh?" message.)</li>
+</ul>
+<h2><a name="label:77" id="label:77">Instance Methods</a></h2><!-- RDLabel: "Instance Methods" -->
+<p>None, examine instance attributes for useful information.</p>
+
+</body>
+</html>
