@@ -1,7 +1,6 @@
 =====
 Ruby-LCD, a bunch of Ruby stuff for LCDProc (lcdproc.org)
-http://seph.us/?z=code-ruby-lcd
-(C) 2003 Ryan Joseph <j@seph.us>
+(C) 2003-2008 Ryan Joseph <j@seph.us>
 
 =====
 Requires
@@ -17,11 +16,6 @@ no plans to make them more portable to different display sizes for two
 reasons: 1) 20x4 known to be the best-supported display size for lcdproc and
 2) I only have a 20x4 display and am too lazy to use the curses driver to
 write for others.  If you want to send me a new LCD to test, feel free ;)
-
-=====
-Library
-
-See README.library
 
 =====
 Install
@@ -41,11 +35,19 @@ J@seph.us is a great way to get ahold of me!
 ======
 License
 
+See COPYING. It has all the boring legalese.
+
 All of this stuff (and I mean all of it) is licensed under the GNU GPL
 license, available from www.gnu.org.  Technically I'm supposed to include that
 stupid, long preamble in every file, but I'm not going to sue you if you use
 my code, steal if, molest it, have your way with it, anything.  Go right
 ahead, seriously.
+
+I have one and only one condition: my name and copyright information *MUST* be
+included, at least once, with any release of this software, binary or source,
+or any reproduction or redistribution of anything piece herein.
+
+Thanks, and enjoy!
 
 ======
 $Id: README.install,v 1.2 2003/08/16 09:54:26 rjoseph Exp $
